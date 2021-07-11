@@ -30,8 +30,12 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 */
+const elementoPreco = document.querySelector('.total-price');
 const armazenamento = [];
 const button = document.querySelector('.empty-cart');
+const preco = {
+  preco: 0,
+};
 
 function excluirLocalStorage(item) {
   if (localStorage.length > 0) {
@@ -47,6 +51,10 @@ function excluirLocalStorage(item) {
   }
 }
 
+function zerarPreço() {
+  elementoPreco.innerText = '';
+}
+
 function excluirItensDoCarrinhoDeCompra() {
   const todosOsElementosLi = document.querySelectorAll('li');
   todosOsElementosLi.forEach((elemento) => {
@@ -56,10 +64,22 @@ function excluirItensDoCarrinhoDeCompra() {
     excluirLocalStorage(elemento);
   });
   localStorage.removeItem('ids');
+  zerarPreço();
+}
+
+function diminuirPreços(texto) {
+  const textos = texto.split('$');
+  textos.forEach((elemento, index) => {
+    if (index === 1) {
+     preco.preco -= Number(elemento);
+      elementoPreco.innerText = `${preco.preco}`;
+    }
+  });
 }
 
 function cartItemClickListener(event) {
   event.target.remove();
+  diminuirPreços(event.target.innerText);
   excluirLocalStorage(event.target.innerText);
 }
 
@@ -68,12 +88,18 @@ function inserirLocalStorage(id) {
   localStorage.setItem('ids', armazenamento);
 }
 
+function somarPreços(elemento) {
+  preco.preco += elemento;
+  elementoPreco.innerText = `${preco.preco}`;
+}
+
 function createCartItemElement({ id, title, price }) {
   const li = document.createElement('li');
   
   li.className = 'cart__item';
   li.innerText = `SKU: ${id} | NAME: ${title} | PRICE: $${price}`;
   li.addEventListener('click', cartItemClickListener);
+  somarPreços(price);
 
   return li;
 }
@@ -91,7 +117,6 @@ function localStorageloand() {
     localStorage.getItem('ids').split(',').forEach((elemento) => {
       armazenamento.push(elemento);
     });
-    console.log(armazenamento);
     armazenamento.forEach((armazenado) => {
       if (armazenado !== '') {
         criandoApiPeloId(armazenado);
