@@ -30,27 +30,81 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 */
+const armazenamento = [];
+const button = document.querySelector('.empty-cart');
+
+function excluirLocalStorage(item) {
+  if (localStorage.length > 0) {
+    const arrayItem = item.split(' ');
+    armazenamento.forEach((elementos) => {
+    arrayItem.forEach((itens) => {
+      if (itens === elementos) {
+        armazenamento.splice(armazenamento.indexOf(itens), 1);
+      }
+    });
+  });
+  localStorage.setItem('ids', armazenamento);
+  }
+}
+
+function excluirItensDoCarrinhoDeCompra() {
+  const todosOsElementosLi = document.querySelectorAll('li');
+  todosOsElementosLi.forEach((elemento) => {
+    elemento.remove();
+  });
+  armazenamento.forEach((elemento) => {
+    excluirLocalStorage(elemento);
+  });
+  localStorage.removeItem('ids');
+}
 
 function cartItemClickListener(event) {
-  event.srcElement.remove();
+  event.target.remove();
+  excluirLocalStorage(event.target.innerText);
+}
+
+function inserirLocalStorage(id) {
+  armazenamento.push(id);
+  localStorage.setItem('ids', armazenamento);
 }
 
 function createCartItemElement({ id, title, price }) {
   const li = document.createElement('li');
+  
   li.className = 'cart__item';
   li.innerText = `SKU: ${id} | NAME: ${title} | PRICE: $${price}`;
   li.addEventListener('click', cartItemClickListener);
+
   return li;
+}
+
+function criandoApiPeloId(idApi) {
+  fetch(`https://api.mercadolibre.com/items/${idApi}`)
+  .then((response) => response.json())
+  .then((obj) => {
+    elementOl.appendChild(createCartItemElement(obj));
+  });
+}
+
+function localStorageloand() {
+  if (localStorage.getItem('ids') !== null) {
+    localStorage.getItem('ids').split(',').forEach((elemento) => {
+      armazenamento.push(elemento);
+    });
+    console.log(armazenamento);
+    armazenamento.forEach((armazenado) => {
+      if (armazenado !== '') {
+        criandoApiPeloId(armazenado);
+        }
+    });
+  }
 }
 
 function takeId(event) {
   const itens = event.path[1];
   const id = itens.querySelector('.item__sku').innerText;
-  fetch(`https://api.mercadolibre.com/items/${id}`)
-    .then((response) => response.json())
-    .then((obj) => {
-      elementOl.appendChild(createCartItemElement(obj));
-    });
+  criandoApiPeloId(id);
+  inserirLocalStorage(id);
 }
 
 function createListApi(query) {
@@ -74,4 +128,8 @@ function createListApi(query) {
 
 createListApi('computador');
 
-window.onload = () => { };
+button.addEventListener('click', excluirItensDoCarrinhoDeCompra);
+
+window.onload = () => {
+  localStorageloand();
+ };
