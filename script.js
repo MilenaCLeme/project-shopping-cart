@@ -53,6 +53,7 @@ function excluirLocalStorage(item) {
 
 function zerarPreço() {
   elementoPreco.innerText = '';
+  preco.preco = 0;
 }
 
 function excluirItensDoCarrinhoDeCompra() {
@@ -60,9 +61,10 @@ function excluirItensDoCarrinhoDeCompra() {
   todosOsElementosLi.forEach((elemento) => {
     elemento.remove();
   });
-  armazenamento.forEach((elemento) => {
-    excluirLocalStorage(elemento);
-  });
+  while (armazenamento.length) {
+    armazenamento.pop();
+  }
+  localStorage.setItem('ids', armazenamento);
   localStorage.removeItem('ids');
   zerarPreço();
 }
@@ -104,6 +106,21 @@ function createCartItemElement({ id, title, price }) {
   return li;
 }
 
+function adicionarLoand() {
+  const elementoDiv = document.createElement('div');
+  elementoDiv.className = 'loading';
+  const elementoP = document.createElement('p');
+  elementoP.innerHTML = 'loading...';
+  elementoDiv.appendChild(elementoP);
+  const body = document.querySelector('body');
+  body.appendChild(elementoDiv);
+}
+
+function cancelarloading() {
+  const apagar = document.querySelector('.loading');
+  apagar.remove();
+}
+
 function criandoApiPeloId(idApi) {
   fetch(`https://api.mercadolibre.com/items/${idApi}`)
   .then((response) => response.json())
@@ -134,6 +151,7 @@ function takeId(event) {
 
 function createListApi(query) {
   if (query === 'computador') {
+    adicionarLoand();
     fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${query}`)
     .then((response) => response.json())
     .then((obj) => {
@@ -145,9 +163,8 @@ function createListApi(query) {
       elementos.forEach((elemento) => {
         elemento.addEventListener('click', takeId);
       });
+      cancelarloading();
     });
-  } else {
-    alert('Não encontrado');
   }
 }
 
@@ -157,4 +174,4 @@ button.addEventListener('click', excluirItensDoCarrinhoDeCompra);
 
 window.onload = () => {
   localStorageloand();
- };
+};
