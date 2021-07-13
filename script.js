@@ -22,14 +22,14 @@ function createProductItemElement({ id, title, thumbnail }) {
   section.appendChild(createCustomElement('span', 'item__title', title));
   section.appendChild(createProductImageElement(thumbnail));
   section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
-
+  
   return section;
 }
-/*
+
 function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
-*/
+
 const elementoPreco = document.querySelector('.total-price');
 const armazenamento = [];
 const button = document.querySelector('.empty-cart');
@@ -71,9 +71,14 @@ function excluirItensDoCarrinhoDeCompra() {
 
 function diminuirPreços(texto) {
   const textos = texto.split('$');
+  console.log(textos);
   textos.forEach((elemento, index) => {
     if (index === 1) {
-     preco.preco -= Number(elemento);
+      console.log(Number(elemento));
+      preco.preco -= Number(elemento);
+      if (preco.preco < 1) {
+        preco.preco = 0;
+      }
       elementoPreco.innerText = `${preco.preco}`;
     }
   });
@@ -144,7 +149,7 @@ function localStorageloand() {
 
 function takeId(event) {
   const itens = event.path[1];
-  const id = itens.querySelector('.item__sku').innerText;
+  const id = getSkuFromProductItem(itens);
   criandoApiPeloId(id);
   inserirLocalStorage(id);
 }
